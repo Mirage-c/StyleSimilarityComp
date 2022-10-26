@@ -9,7 +9,6 @@ def get_rgb_hist(img, bsize = 16):
     G = img[..., 1] // ( 256 // bsize )
     R = img[..., 2] // ( 256 // bsize )
     index = B * bsize * bsize + G * bsize + R
-    # 该处形成的矩阵即为直方图矩阵
     rgbhist = cv2.calcHist([index], [0], None, [bsize * bsize * bsize], [0, bsize * bsize * bsize])
     return rgbhist
 
@@ -83,7 +82,33 @@ def getImgsFromPath(dir, images):
                 path = os.path.join(root, fname)
                 images.append(path)
 
+def compare_img(img1, img2, use_rgb_hist=True):
+    if use_rgb_hist:
+        # input: bgr
+        ref_hist = get_rgb_hist(img1)
+        gen_hist = get_rgb_hist(img2)
+        score = cv2.compareHist(ref_hist, gen_hist, cv2.HISTCMP_CORREL)
+        return score
+    else:
+        gen_hsv = cv2.cvtColor(img1, cv2.COLOR_BGR2HSV)
+        ref_hsv = cv2.cvtColor(img2, cv2.COLOR_BGR2HSV)
+        score = likelihood(ref_hsv, gen_hsv)
+        return score
+
+def test():
+    rgb_hist = False
+    ref_img = cv2.imread("ref.jpg")
+    wRef_img = cv2.imread("wRef.png")
+    # wRef_hsv = cv2.cvtColor(wRef_img, cv2.COLOR_BGR2HSV)
+    woRef_img = cv2.imread("woRef.png")
+    # woRef_img = cv2.cvtColor(woRef_img, cv2.COLOR_BGR2HSV)
+    score = compare_img(ref_img, wRef_img, rgb_hist)
+    score2 = compare_img(ref_img, woRef_img, rgb_hist)
+    print(score, score2)
+    exit(0)
+
 if __name__ == "__main__":
+    # test()
     parser = ArgumentParser()
     parser.add_argument('--ref', help='reference picture folder', type=str)
     parser.add_argument('--gen', help='generated picture folder', type=str)
@@ -119,10 +144,8 @@ if __name__ == "__main__":
             continue
             colors = ('b', 'g', 'r')
             for i, color in enumerate(colors):
-                # ref_hist = cv2.calcHist([ref_img], [i], None, [256], [0,256])
-                # gen_hist = cv2.calcHist([gen_img], [i], None, [256], [0,256])
-                ref_hist = get_rgb_hist(ref_img)
-                gen_hist = get_rgb_hist(gen_img)
+                ref_hist = cv2.calcHist([ref_img], [i], None, [256], [0,256])
+                gen_hist = cv2.calcHist([gen_img], [i], None, [256], [0,256])
                 score = cv2.compareHist(ref_hist, gen_hist, cv2.HISTCMP_CORREL)
                 tot_score += score
             # print(f'(1) {gen_img_path} \n (2) {ref_img_path} \n score=', score)
@@ -130,16 +153,13 @@ if __name__ == "__main__":
     else: # hsv
         for gen_img_path in tqdm(gen_imgs):
             gen_img = cv2.imread(gen_img_path)
-            gen_hsv = cv2.cvtColor(gen_img, cv2.COLOR_BGR2HSV)
             label_file = gen_img_path.split("/")[-1]
             img_file = ref_dict[label_file].replace(".png",".jpg")
             ref_img_path = "/".join([args.ref, img_file])
             ref_img = cv2.imread(ref_img_path)
+            gen_hsv = cv2.cvtColor(gen_img, cv2.COLOR_BGR2HSV)
             ref_hsv = cv2.cvtColor(ref_img, cv2.COLOR_BGR2HSV)
-            # wRef_img = cv2.imread("wRef.png")
-            # wRef_hsv = cv2.cvtColor(wRef_img, cv2.COLOR_BGR2HSV)
-            # woRef_img = cv2.imread("woRef.png")
-            # woRef_img = cv2.cvtColor(woRef_img, cv2.COLOR_BGR2HSV)
+            
             score = likelihood(ref_hsv, gen_hsv)
             tot_score += score
             # print(f'(1) {gen_img_path} \n (2) {ref_img_path} \n score=', score)
