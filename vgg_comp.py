@@ -26,26 +26,11 @@ def getImgsFromPath(dir, images):
                 path = os.path.join(root, fname)
                 images.append(path)
 
-def compare_img(img1, img2, use_rgb_hist=True):
-    pass
-
-def test():
-    rgb_hist = False
-    ref_img = cv2.imread("ref.jpg")
-    wRef_img = cv2.imread("wRef.png")
-    # wRef_hsv = cv2.cvtColor(wRef_img, cv2.COLOR_BGR2HSV)
-    woRef_img = cv2.imread("woRef.png")
-    # woRef_img = cv2.cvtColor(woRef_img, cv2.COLOR_BGR2HSV)
-    score = compare_img(ref_img, wRef_img, rgb_hist)
-    score2 = compare_img(ref_img, woRef_img, rgb_hist)
-    print(score, score2)
-    exit(0)
-
 def comp(vgg_path, style_target, gen_target):
     style_shape = (1,) + style_target.shape
     style_features = {}
     gen_features = {}
-    _style_loss = 0
+    tup = []
     # precompute style features
     with tf.Graph().as_default(), tf.device('/cpu:0'), tf.compat.v1.Session() as sess:
         style_losses = []
@@ -64,13 +49,10 @@ def comp(vgg_path, style_target, gen_target):
             style_features[layer] = gram
             gen_features[layer] = gram2
             style_losses.append(2 * tf.nn.l2_loss(gram - gram2)/gram.size)
-        style_loss = functools.reduce(tf.add, style_losses)
-        to_get = [style_loss]
+        # style_loss = functools.reduce(tf.add, style_losses)
+        to_get = style_losses
         tup = sess.run(to_get)
-        _style_loss = tup[0]
-    if _style_loss == 0:
-        print("[WARNING] style loss is zero!")
-    return _style_loss
+    return tup
 
 if __name__ == "__main__":
     # test()
@@ -91,8 +73,50 @@ if __name__ == "__main__":
     gen_imgs = []
     getImgsFromPath(args.gen, gen_imgs) # 命名与label一致
     # compare them
-    tot_score = 0
+    tot_score = np.zeros(5)
     index = 0
+
+    # style_target = cv2.imread(gen_imgs[0])
+
+    # style_shape = (1,) + style_target.shape
+    # style_features = {}
+    # gen_features = {}
+    # _style_loss = 0
+    # # precompute style features
+    # with tf.Graph().as_default(), tf.device('/cpu:0'), tf.compat.v1.Session() as sess:
+    #     style_losses = []
+    #     style_image = tf.compat.v1.placeholder(tf.float32, shape=style_shape, name='style_image')
+    #     style_image_pre = vgg.preprocess(style_image)
+    #     net = vgg.net(args.vgg_path, style_image_pre)
+    #     for gen_img_path in tqdm(gen_imgs):
+    #         gen_target = cv2.imread(gen_img_path)
+    #         label_file = gen_img_path.split("/")[-1]
+    #         img_file = ref_dict[label_file].replace(".png",".jpg")
+    #         ref_img_path = "/".join([args.ref, img_file])
+    #         style_target = cv2.imread(ref_img_path)
+    #         style_pre = np.array([style_target])
+    #         gen_pre = np.array([gen_target])
+    #         for layer in STYLE_LAYERS:
+    #             features = net[layer].eval(feed_dict={style_image:style_pre})
+    #             features2 = net[layer].eval(feed_dict={style_image:gen_pre})
+    #             features = np.reshape(features, (-1, features.shape[3]))
+    #             features2 = np.reshape(features2, (-1, features2.shape[3]))
+    #             gram = np.matmul(features.T, features) / features.size
+    #             gram2 = np.matmul(features2.T, features2) / features2.size
+    #             style_features[layer] = gram
+    #             gen_features[layer] = gram2
+    #             style_losses.append(2 * tf.nn.l2_loss(gram - gram2)/gram.size)
+    #         style_loss = functools.reduce(tf.add, style_losses)
+    #         to_get = [style_loss]
+    #         tup = sess.run(to_get)
+    #         _style_loss = tup[0]
+    #         if _style_loss == 0:
+    #             print("[WARNING] style loss is zero!")
+    #         score = _style_loss
+    #         tot_score += score 
+    #         print(f"[{index}] {score}, tot_score: {tot_score}", flush=True)
+    #         index += 1
+
     for gen_img_path in tqdm(gen_imgs):
         gen_img = cv2.imread(gen_img_path)
         label_file = gen_img_path.split("/")[-1]
@@ -104,4 +128,5 @@ if __name__ == "__main__":
         tot_score += score
         print(f"[{index}] {score}, tot_score: {tot_score}")
         index += 1
+        exit(0)
     print('avg_score:', tot_score / len(gen_imgs))
