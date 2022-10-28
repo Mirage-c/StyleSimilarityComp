@@ -54,6 +54,7 @@ if __name__ == "__main__":
     style_features = {}
     gen_features = {}
     _style_loss = 0
+    lookup_indexes = [0,7,8,14,95]
     # precompute style features
     with tf.Graph().as_default(), tf.compat.v1.Session() as sess:
         style_image = tf.compat.v1.placeholder(tf.float32, shape=style_shape, name='style_image')
@@ -68,6 +69,14 @@ if __name__ == "__main__":
             style_target = cv2.imread(ref_img_path)
             style_pre = np.array([style_target])
             gen_pre = np.array([gen_target])
+            # if index in lookup_indexes:
+            #     print(index)
+            #     print(ref_img_path)
+            #     print(gen_img_path)
+            #     print(gen_img_path.replace('wRef_160', 'woRef_160'))
+            #     lookup_indexes.remove(index)
+            #     if len(lookup_indexes) == 0:
+            #         exit(0)
             for layer in STYLE_LAYERS:
                 features = net[layer].eval(feed_dict={style_image:style_pre})
                 features2 = net[layer].eval(feed_dict={style_image:gen_pre})
@@ -84,6 +93,6 @@ if __name__ == "__main__":
             tot_score += score 
             score_out = ["{:.1f}".format(x) for x in score]
             tot_score_out = ["{:.1f}".format(x) for x in tot_score]
-            print(f"[{index}] {score_out}, tot_score: {tot_score_out}")    
+            # print(f"[{index}] {score_out}, tot_score: {tot_score_out}")    
             index += 1
     print('avg_score:', tot_score / len(gen_imgs))

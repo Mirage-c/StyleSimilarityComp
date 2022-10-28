@@ -8,4 +8,4 @@ rgb & hsv
 conda create -n tf-gpu tensorflow-gpu=2.1.0
 conda activate tf-gpu
 ```
-速度：NVIDIA TITAN RTX上，大约1s能完成3~4次迭代。
+速度：NVIDIA TITAN RTX上，大约1s能完成2~3次迭代。

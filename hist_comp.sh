@@ -1,8 +1,7 @@
 python hist_comp.py \
---ref /data/chentuo/jittor/data/train_resized/imgs \
---gen /data/chentuo/jittor/jittor-ThisNameIsGeneratedByJittor-Landscape/SPADE-jittor/results/bs4vae/test_90/images/synthesized_image
-
+--gen /mnt/disk1/ct/jittor/JGAN/models/gaugan/results/bs4vae/test_190_refNoise/images/synthesized_image \
+--ref /mnt/disk1/ct/jittor/data/train_resized/imgs
 
 python hist_comp.py \
---ref /data/chentuo/jittor/data/train_resized/imgs \
---gen /data/chentuo/jittor/jittor-ThisNameIsGeneratedByJittor-Landscape/SPADE-jittor/results/bs4vae/test_90_withoutref/images/synthesized_image
+--gen /mnt/disk1/ct/jittor/JGAN/models/gaugan/results/bs4vae/test_190/images/synthesized_image \
+--ref /mnt/disk1/ct/jittor/data/train_resized/imgs
