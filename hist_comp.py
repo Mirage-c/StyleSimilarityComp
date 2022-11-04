@@ -141,15 +141,6 @@ if __name__ == "__main__":
             gen_hist = get_rgb_hist(gen_img)
             score = cv2.compareHist(ref_hist, gen_hist, cv2.HISTCMP_CORREL)
             tot_score += score
-            continue
-            colors = ('b', 'g', 'r')
-            for i, color in enumerate(colors):
-                ref_hist = cv2.calcHist([ref_img], [i], None, [256], [0,256])
-                gen_hist = cv2.calcHist([gen_img], [i], None, [256], [0,256])
-                score = cv2.compareHist(ref_hist, gen_hist, cv2.HISTCMP_CORREL)
-                tot_score += score
-            # print(f'(1) {gen_img_path} \n (2) {ref_img_path} \n score=', score)
-            # exit(0)
     else: # hsv
         for gen_img_path in tqdm(gen_imgs):
             gen_img = cv2.imread(gen_img_path)

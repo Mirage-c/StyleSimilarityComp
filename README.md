@@ -3,6 +3,9 @@
 ## 直方图法
 rgb & hsv
 ## vgg19
+默认使用jittor
+大约1s能完成
+## vgg19_tensorflow
 配置虚拟环境：
 ```bash
 conda create -n tf-gpu tensorflow-gpu=2.1.0
