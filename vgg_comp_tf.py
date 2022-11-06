@@ -56,6 +56,7 @@ if __name__ == "__main__":
     _style_loss = 0
     lookup_indexes = [0,7,8,14,95]
     # precompute style features
+    tf.set_random_seed(1234)
     with tf.Graph().as_default(), tf.compat.v1.Session() as sess:
         style_image = tf.compat.v1.placeholder(tf.float32, shape=style_shape, name='style_image')
         style_image_pre = vgg.preprocess(style_image)

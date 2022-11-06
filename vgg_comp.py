@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 import os, functools
 import jittor as jt
+import time
 from jittor import nn
 from jittor import models
 from jittor.dataset.dataset import Dataset
@@ -132,23 +133,22 @@ if __name__ == "__main__":
     args = parser.parse_args()
     if args.vgg_path is not None:
         print("### WARNING: vgg_path is depreciated, and pretrained vgg is used instead ###")
-    image_set = ImageTestSet(args, num_workers=0)
+    image_set = ImageTestSet(args, num_workers=4)
     # compare them
-    tot_score = jt.float32(0)
-    index = jt.int32(0)
+    tot_score = 0
+    index = 0
     _style_loss = 0
     vgg_loss = VGGLoss()
     vgg_loss.eval()
     for ref_img, gen_img in tqdm(image_set):
         # send them into the vgg net
         score = vgg_loss(ref_img, gen_img)
-        tot_score += score
-        ### OUTPUT ###
-        # score_out = ["{:.1f}".format(x) for x in score]
-        # tot_score_out = ["{:.1f}".format(x) for x in tot_score]
-        # print(f"[{index}] {score_out}, tot_score: {tot_score_out}")    
+        tot_score += score.item()
         ### index step ###
         # index += 1
         # if index % 200 == 0:
         #     print(tot_score.data[0])
-    print('avg_score:', tot_score.data[0] / len(image_set.gen_img_paths))
+    t = time.time()
+    print("begin timing...")
+    print('avg_score:', tot_score / len(image_set.gen_img_paths))
+    print("end timing, using ", time.time() - t) # 486.2740638256073
